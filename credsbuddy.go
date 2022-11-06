@@ -1,10 +1,11 @@
-package sqsbuddy
+package iotdaemon
 
 import (
 	"context"
 	"encoding/json"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
 type CredsBuddy struct {

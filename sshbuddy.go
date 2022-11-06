@@ -1,9 +1,10 @@
-package sqsbuddy
+package iotdaemon
 
 import (
 	"errors"
-	"golang.org/x/crypto/ssh"
 	"os"
+
+	"golang.org/x/crypto/ssh"
 )
 
 type SSHBuddy struct {

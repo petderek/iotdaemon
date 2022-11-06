@@ -1,4 +1,4 @@
-package sqsbuddy
+package iotdaemon
 
 import (
 	"context"

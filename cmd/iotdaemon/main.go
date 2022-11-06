@@ -4,12 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/petderek/iotdaemon"
 	"log"
 	"net/url"
 	"os/user"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/petderek/sqsbuddy"
+	"github.com/petderek/light"
 )
 
 const (
@@ -47,7 +49,7 @@ func main() {
 		}
 	}
 
-	ssh := &sqsbuddy.SSHBuddy{
+	ssh := &iotdaemon.SSHBuddy{
 		User:          who,
 		Address:       urldata.Host,
 		Command:       fmt.Sprintf(federateCmd, *region, *role),
@@ -56,7 +58,7 @@ func main() {
 		InsecureHosts: true,
 	}
 
-	provider := &sqsbuddy.CredsBuddy{SSH: ssh}
+	provider := &iotdaemon.CredsBuddy{SSH: ssh}
 	cfg, err := config.LoadDefaultConfig(
 		ctx,
 		config.WithRegion(*region),
@@ -66,7 +68,7 @@ func main() {
 		log.Fatalln("unable to load config: ", err)
 	}
 
-	buddy := sqsbuddy.SQSBuddy{
+	buddy := iotdaemon.SQSBuddy{
 		Config:  cfg,
 		Context: ctx,
 		Url:     *queue,
@@ -76,7 +78,16 @@ func main() {
 
 	for msg, ok := <-queue; ok; msg, ok = <-queue {
 		if msg != nil {
-			log.Println("message: ", *msg)
+			log.Println("msg: ", *msg)
+			todo := strings.Split(*msg, " ")
+			cmd, err := light.Infer(todo[0], todo[1])
+			if err != nil {
+				log.Println("error: ", err)
+			}
+			err = light.Send(*serialPort, cmd)
+			if err != nil {
+				log.Println("error:  ", err)
+			}
 		}
 	}
 	log.Fatalln("channel closed")
